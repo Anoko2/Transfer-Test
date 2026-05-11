@@ -1,0 +1,37 @@
+---
+name: cc-find-communication-cn
+description: 在 communication/ 目录中搜索邮件、电话记录、办公时间记录、与教授/TA的通信。用当用户找邮件或通话记录时。
+---
+
+# 搜索通信记录
+
+在 `communication/` 目录中搜索邮件草稿、电话脚本、办公时间记录和与教授/TA的所有通信记录。
+
+**使用 cc-find-cn 核心搜索能力，但限制范围在 communication/ 目录。**
+
+## 用法
+
+```
+/cc-find-communication-cn 教授回复        # 查找与教授的通信
+/cc-find-communication-cn 办公时间        # 查找办公时间记录
+/cc-find-communication-cn                  # 不带参数，AI 询问你想找什么
+```
+
+## 搜索范围
+
+- 邮件草稿和记录（`.md`, `.eml`, `.txt`）
+- 电话脚本和通话记录
+- 办公时间访问记录
+- 与教授/TA 的所有通信
+
+## 执行方式
+
+调用 `/cc-find-cn` 的核心搜索逻辑，但：
+1. 限制搜索范围在 communication/ 目录下
+2. 识别联系人名字（教授名字、TA 名字等）进行匹配
+3. 支持时间搜索（"最近", "上周", "三月" 等）
+4. 显示文件修改时间，帮助用户快速定位
+
+## 参数
+
+$ARGUMENTS
