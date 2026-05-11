@@ -1,0 +1,127 @@
+description = "收集课程资料（URL/粘贴/截图），自动下载分类整理到本地。中文版 cc-add-ref。"
+
+# NOTE: Claude positional/named arguments collapsed to {{args}} during migration.
+prompt = """
+# 添加课程参考资料
+
+从各种来源收集和整理课程资料。自动化下载和分类，最大程度减少用户输入。
+
+## 重要：第一步
+
+**在执行任何操作之前，先阅读 [directory-structure.md](../references/directory-structure.md) 了解目录结构规范。**
+
+## 使用方法
+
+```
+/cc-add-ref-cn                          - 显示帮助
+/cc-add-ref-cn <url>                    - 从 URL 获取内容（自动下载关联资源）
+/cc-add-ref-cn paste                    - 处理粘贴的文本
+/cc-add-ref-cn screenshot <path>        - 分析截图并提取信息
+```
+
+## 核心理念
+
+**最大化自动化，最小化用户输入。** 当收到 URL 时：
+1. 自动发现并下载尽可能多的关联资源
+2. 分类归档到对应目录
+3. 始终更新 INDEX.md，记录所有发现的 URL（无论是否下载成功）
+4. 只在真正必要时才询问用户
+
+## 下载策略
+
+### Binary 文件（PDF、PPTX、DOCX、图片等）
+1. 使用 `curl` 或其他工具下载原始文件
+2. 必要时重命名为描述性名称
+3. 归档到对应目录：
+   - Slides → `references/slides/`
+   - Textbooks/Books → `references/textbooks/`
+   - Papers/Articles → `references/readings/`
+   - 其他材料 → `references/supplementary/`
+
+### 网页 / HTML 内容
+1. 使用 `WebFetch` 获取内容
+2. 转换为干净的 Markdown
+3. 保存为 `.md` 文件到对应目录
+4. 在 markdown 中保留重要链接
+
+### 无法访问的资源
+如果下载失败（需要登录、链接失效等）：
+1. 仍然将条目添加到 INDEX.md 并附带 URL
+2. 标记为 `[未下载 - 需要登录]` 或类似说明
+3. 继续处理其他资源
+
+## INDEX.md 更新规则
+
+**发现的每个资源都必须添加到 INDEX.md**，无论是否下载成功：
+
+```markdown
+## 已下载
+- [lecture-01-intro.pdf](./lecture-01-intro.pdf) - 数据结构导论
+- [week1-reading.md](./week1-reading.md) - 基础概念概述
+
+## 外部链接（未下载）
+- [Canvas Assignment 1](https://canvas.edu/...) - 需要登录
+- [Video Lecture](https://youtube.com/...) - 外部视频内容
+```
+
+## URL 输入的工作流程
+
+1. **获取主页面**：使用 `WebFetch` 获取内容
+2. **提取所有链接**：找到 PDF、docs、slides、wiki 页面、课程材料
+3. **自动下载**：无需询问，下载所有可访问的内容
+   - Binary 文件 → 使用 `curl -L -o` 下载
+   - HTML/文本 → 转换为 markdown
+4. **分类**：将文件放入正确的 `references/` 子目录
+5. **更新 INDEX.md**：添加所有发现的 URL 及描述
+   - 已下载文件：`[filename](./filename) - 描述`
+   - 未下载：`[标题](url) - 描述 [external/requires login]`
+6. **报告**：向用户展示下载情况和无法访问的内容
+
+## 目标位置映射
+
+| 内容类型 | 目标位置 | 文件格式 |
+|---------|---------|---------|
+| Lecture slides (PDF/PPTX) | `references/slides/` | 保持原格式 |
+| Textbooks, course notes | `references/textbooks/` | 保持原格式 |
+| Papers, articles | `references/readings/` | 原格式或 .md |
+| Wiki 页面, HTML docs | `references/readings/` | 转换为 .md |
+| Code examples | `references/supplementary/` | 保持原格式 |
+| Worksheets, practice | `references/supplementary/` | 保持原格式 |
+| Syllabus 信息 | `COURSE_INFO.md` | 更新相应部分 |
+| Assignment specs | `assignments/` | 创建文件夹 |
+
+## 文件命名规范
+
+- 原名称有描述性时保持原名
+- 不清晰时重命名：`lecture-NN-topic.pdf`、`reading-topic.md`
+- 使用小写字母和连字符
+- 保留文件扩展名
+
+## 处理粘贴文本
+
+当用户粘贴内容时：
+1. 分析内容类型（syllabus、assignment、schedule 等）
+2. 提取结构化信息
+3. 确定目标位置
+4. 适当保存并更新 INDEX.md
+
+## 处理截图
+
+当给定截图路径时：
+1. 使用 `Read` 工具查看图片
+2. 提取可见的文字和 URL
+3. 对提取的 URL 应用相同的下载策略
+4. 更新相应的 INDEX.md 文件
+
+## 重要注意事项
+
+- **积极下载** - 下载所有可访问的内容
+- **始终更新 INDEX** - 发现的每个 URL 都要进入 INDEX.md
+- **保留原始文件** - 不修改下载的 binary 文件
+- **HTML 转 Markdown** - 文本内容转换为可搜索的格式
+- **优雅降级** - 下载失败时记录并继续
+
+## Arguments
+
+{{args}}
+"""

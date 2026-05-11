@@ -7,7 +7,7 @@ description = "Migrate a Claude Code project's .claude/ skills, commands, agents
 # - allowed-tools — Gemini has no equivalent. This command has unrestricted tool
 #   access. Review carefully before running on sensitive repositories.
 # NOTE: Claude positional/named arguments collapsed to {{args}} during migration.
-prompt = """
+prompt = '''
 # /migrate — Claude Code → Codex + Gemini migrator
 
 You are running the `/migrate` skill. Your job is to translate a Claude Code project's `.claude/` configuration into Codex CLI and Gemini CLI equivalents inside the same target repository.
@@ -227,4 +227,4 @@ Gemini auto-discovers .gemini/commands/ — nothing to do.
 - Do NOT skip MIGRATION_REPORT.md — it's the user's audit trail.
 - Do NOT proceed if Step 0 validation fails.
 - Do NOT leave partial output on failure. Track every file path created during this run. If any step after the first write fails, delete every path in that list before stopping and report which step failed — so the user can retry on a clean state.
-"""
+'''
