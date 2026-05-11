@@ -1,0 +1,168 @@
+---
+name: cc-add-ref
+description: Fetch and organize course materials from URLs, pasted text, or screenshots. Use when collecting syllabus, readings, slides, assignments, or any course-related content to store locally.
+argument-hint: "[url or 'paste' or 'screenshot']"
+---
+
+# Add Course Reference Materials
+
+Collect and organize course materials from various sources. Automate downloading and categorization with minimal user input.
+
+## IMPORTANT: First Step
+
+**Before doing anything, read [directory-structure.md](../references/directory-structure.md) to understand the directory structure conventions.**
+
+## Usage
+
+```
+/cc-add-ref                          - Show this help
+/cc-add-ref <url>                    - Fetch content from URL (auto-download linked resources)
+/cc-add-ref paste                    - Process pasted text (user will paste next)
+/cc-add-ref screenshot <path>        - Analyze screenshot and extract info
+```
+
+## Core Philosophy
+
+**Maximize automation, minimize user input.** When given a URL:
+1. Automatically discover and download as many linked resources as possible
+2. Categorize and archive them to appropriate directories
+3. Always update INDEX.md with all discovered URLs (downloaded or not)
+4. Only ask user when truly necessary
+
+## Download Strategy
+
+### For Binary Files (PDF, PPTX, DOCX, images, etc.)
+1. Download the original file using `curl` or appropriate tool
+2. Rename with descriptive name if needed
+3. Archive to appropriate directory:
+   - Slides → `references/slides/`
+   - Textbooks/Books → `references/textbooks/`
+   - Papers/Articles → `references/readings/`
+   - Other materials → `references/supplementary/`
+
+### For Web Pages / HTML Content
+1. Use `WebFetch` to retrieve content
+2. Convert to clean Markdown
+3. Save as `.md` file in appropriate directory
+4. Preserve important links in the markdown
+
+### For Inaccessible Resources
+If download fails (login required, broken link, etc.):
+1. Still add entry to INDEX.md with URL
+2. Mark as `[Not downloaded - requires access]` or similar
+3. Continue with other resources
+
+## INDEX.md Update Rules
+
+**Every discovered resource MUST be added to INDEX.md**, whether downloaded or not:
+
+```markdown
+## Downloaded
+- [lecture-01-intro.pdf](./lecture-01-intro.pdf) - Introduction to data structures
+- [week1-reading.md](./week1-reading.md) - Basic concepts overview
+
+## External Links (not downloaded)
+- [Canvas Assignment 1](https://canvas.edu/...) - Requires login
+- [Video Lecture](https://youtube.com/...) - External video content
+```
+
+## Workflow for URL Input
+
+1. **Fetch main page**: Use `WebFetch` to get content
+2. **Extract all links**: Find PDFs, docs, slides, wiki pages, course materials
+3. **Auto-download**: Download everything possible without asking
+   - Binary files → download with `curl -L -o`
+   - HTML/text → convert to markdown
+4. **Categorize**: Place files in correct `references/` subdirectory
+5. **Update INDEX.md**: Add ALL discovered URLs with descriptions
+   - Downloaded files: `[filename](./filename) - description`
+   - Not downloaded: `[Title](url) - description [external/requires login]`
+6. **Report**: Show user what was downloaded and what couldn't be accessed
+
+## Destination Mapping
+
+| Content Type | Destination | File Format |
+|-------------|-------------|-------------|
+| Lecture slides (PDF/PPTX) | `references/slides/` | Keep original |
+| Textbooks, course notes | `references/textbooks/` | Keep original |
+| Papers, articles | `references/readings/` | Keep original or .md |
+| Wiki pages, HTML docs | `references/readings/` | Convert to .md |
+| Code examples | `references/supplementary/` | Keep original |
+| Worksheets, practice | `references/supplementary/` | Keep original |
+| Syllabus info | `COURSE_INFO.md` | Update sections |
+| Assignment specs | `assignments/` | Create folder |
+
+## File Naming Convention
+
+- Keep original names when descriptive
+- Rename if unclear: `lecture-NN-topic.pdf`, `reading-topic.md`
+- Use lowercase with hyphens
+- Preserve file extensions
+
+## Example Workflow
+
+```
+User: /cc-add-ref <course-url>
+
+AI discovers links on the page:
+- 12 lecture slide PDFs
+- 3 wiki pages (course concepts)
+- 1 course notes PDF
+- 4 practice problem sets (PDF)
+- 2 assignment links (Canvas, requires login)
+- 1 external video playlist (YouTube)
+
+AI Actions:
+1. Read directory-structure.md
+2. Fetch and analyze main course page
+3. Download 12 slide PDFs → references/slides/
+4. Download course notes PDF → references/textbooks/
+5. Download 4 problem sets → references/supplementary/
+6. Fetch 3 wiki pages, convert to markdown → references/readings/
+7. Record Canvas links in INDEX (cannot access)
+8. Record YouTube playlist in INDEX (external)
+9. Update all relevant INDEX.md files
+10. Report summary to user
+
+Output:
+✓ Downloaded 12 lecture slides to references/slides/
+✓ Downloaded 1 course notes to references/textbooks/
+✓ Downloaded 4 problem sets to references/supplementary/
+✓ Converted 3 wiki pages to references/readings/
+✗ 2 assignment links require login (added to INDEX)
+✗ 1 video playlist is external (added to INDEX)
+
+Updated indexes:
+- references/slides/INDEX.md (12 entries)
+- references/textbooks/INDEX.md (1 entry)
+- references/supplementary/INDEX.md (4 entries)
+- references/readings/INDEX.md (3 entries + 3 external links)
+```
+
+## Handling Pasted Text
+
+When user pastes content:
+1. Analyze content type (syllabus, assignment, schedule, etc.)
+2. Extract structured information
+3. Determine destination
+4. Save appropriately and update INDEX.md
+
+## Handling Screenshots
+
+When given screenshot path:
+1. Use `Read` tool to view image
+2. Extract text and URLs visible
+3. Process extracted URLs with same download strategy
+4. Update appropriate INDEX.md files
+
+## Important Notes
+
+- **Be aggressive with downloads** - Download everything accessible
+- **Always update INDEX** - Every URL discovered goes into INDEX.md
+- **Preserve originals** - Don't modify downloaded binary files
+- **Convert HTML to Markdown** - For text content, make it searchable
+- **Fail gracefully** - If something can't download, log it and continue
+
+## Arguments
+
+$ARGUMENTS
